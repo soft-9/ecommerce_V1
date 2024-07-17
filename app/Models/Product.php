@@ -9,13 +9,11 @@ class Product extends Model
 {
   use HasFactory;
 
-    protected $fillable = [
-        'title_en', 'title_ar', 'name_en', 'name_ar', 
-        'description_en', 'description_ar', 'model_en', 
-        'model_ar', 'avatar_main', 'avatar_details', 
-        'price_before_discount', 'price', 'quantity', 
-        'stars', 'category_id'
-    ];
+  protected $fillable = [
+    'title_en', 'title_ar', 'name_en', 'name_ar', 'description_en', 'description_ar',
+    'model_en', 'model_ar', 'avatar_main', 'avatar_details', 'price_before_discount', 
+    'price', 'quantity', 'stars', 'category_id'
+];
 
     public function category()
     {
@@ -30,5 +28,19 @@ class Product extends Model
     public function likes()
     {
         return $this->hasMany(Like::class);
+    }
+
+    public function colors()
+    {
+        return $this->belongsToMany(Color::class, 'product_colors');
+    }
+    public function setAvatarDetailsAttribute($value)
+    {
+        $this->attributes['avatar_details'] = json_encode($value);
+    }
+
+    public function getAvatarDetailsAttribute($value)
+    {
+        return json_decode($value, true);
     }
 }
