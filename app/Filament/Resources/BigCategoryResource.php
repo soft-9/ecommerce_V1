@@ -3,23 +3,27 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BigCategoryResource\Pages;
-use App\Filament\Resources\BigCategoryResource\RelationManagers;
 use App\Models\BigCategory;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BigCategoryResource extends Resource
 {
     protected static ?string $model = BigCategory::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationIcon = 'heroicon-o-inbox-stack';
+    protected static ?string $navigationLabel = 'bigCategory';
+    protected static ?string $breadcrumb = 'bigCategory';
+    protected static ?string $title = 'bigCategory';
+    protected static ?string $slug = 'bigCategory';
+    protected static ?string $navigationGroup = 'Category';
+    protected static ?int $navigationSort = 0 ;
     public static function form(Form $form): Form
     {
         return $form
@@ -30,7 +34,10 @@ class BigCategoryResource extends Resource
                 Forms\Components\TextInput::make('name_ar')
                     ->required()
                     ->maxLength(255),
-                    FileUpload::make('avatar')->required(),
+                FileUpload::make('avatar')
+                    ->disk('public')
+                    ->directory('bigcategory')
+                    ->required(),
             ]);
     }
 
@@ -38,26 +45,46 @@ class BigCategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name_en')
+                TextColumn::make('name_en')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('name_ar')
+                TextColumn::make('name_ar')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('avatar')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                ImageColumn::make('avatar')
+                    ->label('Avatar')
+                    ->sortable(),
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('creator.name')
+                    ->label('Created By')
+                    ->sortable()
+                    ->searchable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->modalHeading('Edit Big Category')
+                    ->modalButton('Save Changes')
+                    ->using(function ($record, array $data) {
+                        $record->update($data);
+                    }),
+                Tables\Actions\DeleteAction::make()
+                    ->action(function ($record) {
+                        $record->delete();
+                    })
+                    ->requiresConfirmation()
+                    ->color('danger')
+                    ->icon('heroicon-o-trash')
+                    ->modalHeading('Delete Big Category')
+                    ->modalSubheading('Are you sure you want to delete this Big Category? This action cannot be undone.')
+                    ->modalButton('Yes, delete'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -77,8 +104,7 @@ class BigCategoryResource extends Resource
     {
         return [
             'index' => Pages\ListBigCategories::route('/'),
-            'create' => Pages\CreateBigCategory::route('/create'),
-            'edit' => Pages\EditBigCategory::route('/{record}/edit'),
         ];
     }
 }
+

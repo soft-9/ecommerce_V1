@@ -6,23 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('big_categories', function (Blueprint $table) {
-          $table->id();
-          $table->string('name_en');
-          $table->string('name_ar');
-          $table->string('avatar');
-          $table->timestamps();
+            $table->id();
+            $table->string('name_en');
+            $table->string('name_ar');
+            $table->string('avatar');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('big_categories');
